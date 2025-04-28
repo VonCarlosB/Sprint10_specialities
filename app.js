@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const usersData = require('./users')
 const specialities = ['marketing', 'developers', 'QAs', 'ventas']
+const PORT = 3000
 
 //ROUTES
 
@@ -9,9 +10,7 @@ app.get('/', (req, res) => {
     res.send(`<h1>Página principal</h1><ul>${createLinks()}</ul>`)
 })
 
-for (const route of specialities) {
-    createRoute(route)
-}
+specialities.forEach(route => createRoute(route))
 
 app.use((req, res) => {
     res.status(404).send('<h1>Página no encontrada</h1><a href="/">Home</a>')
@@ -19,8 +18,8 @@ app.use((req, res) => {
 
 //LISTEN
 
-app.listen(3000, () => {
-    console.log('Server listening on port 3000')
+app.listen(PORT, () => {
+    console.log('Server listening on port http://localhost:'+PORT)
 })
 
 //FUNCTIONS
@@ -30,23 +29,24 @@ function checkSpeciality(spec){
 }
 
 function specialtyTemplate(spec){
-    let users = checkSpeciality(spec)
-    let ans = `
+    const users = checkSpeciality(spec)
+    return`
     <a href="/">Inicio</a><br>
     <h3>Nº de usuarios: ${users.length}</h3>
     <ul>
-    `
-    for (const user of users) {
-        ans += `
-        <li><ul><u>${user.name}</u>:
-            <li><b>ID:</b> ${user.id}</li>
-            <li><b>Age:</b> ${user.age}</li>
-            <li><b>Specialty:</b> ${user.specialty}</li>
-        </ul></li>
+    ${users.map((user) => {
+        return `
+        <li>
+            <ul><u>${user.name}</u>:
+                <li><b>ID:</b> ${user.id}</li>
+                <li><b>Age:</b> ${user.age}</li>
+                <li><b>Specialty:</b> ${user.specialty}</li>
+            </ul>
+        </li>
         `
-    }
-    ans += '</ul>'
-    return ans
+        }).join("")}
+    </ul>
+    `
 }
 
 function createRoute(route){
@@ -60,9 +60,5 @@ function linkTemplate(link){
 }
 
 function createLinks(){
-    let ans = ''
-    for (const link of specialities) {
-        ans += linkTemplate(link)
-    }
-    return ans
+    return specialities.map(link => linkTemplate(link)).join("")
 }
